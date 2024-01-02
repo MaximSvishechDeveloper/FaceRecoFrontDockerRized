@@ -1,13 +1,15 @@
 import React from "react";
+import "./FaceRecognition.css";
 
-const FaceRecognition = ({imgSrc}) => {
-  return (
-    <div className="center ma">
-    <div className="absoulute mt2">
-      {imgSrc && <img style={{maxHeight:"600px"}} alt="facereco" src={imgSrc} width='500px' height='auto' />}
+const FaceRecognition = ({ imageUrl, box }) => {
+    return (
+      <div className='center ma'>
+        <div className='absolute mt2'>
+          <img id='inputimage' alt='' src={imageUrl} width='500px' heigh='auto'/>
+          <div className='bounding-box' style={{top: box.topRow, right: box.rightCol, bottom: box.bottomRow, left: box.leftCol}}></div>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
 export default FaceRecognition;

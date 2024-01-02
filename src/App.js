@@ -10,12 +10,13 @@ import ParticlesBg from "particles-bg";
 function App() {
   const [input, setInput] = useState("");
   const [img, setImg] = useState("");
+  const [imgBorder, setImageBorder] = useState({})
 
   const getImageReq = (img) => {
     const PAT = "57643cc08f004cc1902541cb9266b860";
     const USER_ID = "maxim";
     const APP_ID = "face-reco";
-    const IMAGE_URL = img.toString();
+    const IMAGE_URL = img;
 
     const raw = JSON.stringify({
       user_app_id: {
@@ -45,9 +46,32 @@ function App() {
     return requestOptions;
   };
 
+  const calculateFaceLocation = (data) => {
+    const image = document.getElementById("inputimage");
+    const width = Number(image.width);
+    const height = Number(image.height);
+    console.log(width,height,data);
+    console.log(data.bottom_row * height);
+
+    const border = {
+      leftCol: data.left_col * width,
+      topRow: data.top_row * height,
+      rightCol: width - (data.right_col * width),
+      bottomRow: height - (data.bottom_row * height)
+    }
+
+    console.log(border);
+
+    return border
+  }
+
   const OnInputChange = (event) => {
     setInput(event.target.value);
   };
+
+  const displayBox = (box) => {
+    setImageBorder(box);
+  }
 
   const onButtonSubmit = () => {
     setImg(input);
@@ -56,7 +80,7 @@ function App() {
       getImageReq(input)
     )
       .then((response) => response.json())
-      .then((result) => console.log(result))
+      .then((result) => {console.log(result); return displayBox(calculateFaceLocation(result.outputs[0].data.regions[0].region_info.bounding_box))})
       .catch((error) => console.log("error", error));
   };
 
@@ -70,7 +94,7 @@ function App() {
         inputChange={OnInputChange}
         buttonSubmit={onButtonSubmit}
       />
-      <FaceRecognition imgSrc={img} />
+      <FaceRecognition imageUrl={img} box={imgBorder} />
     </div>
   );
 }
