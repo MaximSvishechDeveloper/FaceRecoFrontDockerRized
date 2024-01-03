@@ -5,12 +5,16 @@ import Logo from "./Components/Logo/Logo";
 import ImageLinkFrom from "./Components/ImageLinkFrom/ImageLinkFrom";
 import FaceRecognition from "./Components/FaceRecognition/FaceRecognition";
 import Rank from "./Components/Rank/Rank";
+import SignIn from "./Components/SignIn/SignIn";
+import Register from "./Components/Register/Register";
 import ParticlesBg from "particles-bg";
 
 function App() {
   const [input, setInput] = useState("");
   const [img, setImg] = useState("");
-  const [imgBorder, setImageBorder] = useState({})
+  const [imgBorder, setImageBorder] = useState({});
+  const [route, SetRoute] = useState("signIn");
+  const [isSignedIn,SetSignedIn] = useState(false);
 
   const getImageReq = (img) => {
     const PAT = "57643cc08f004cc1902541cb9266b860";
@@ -50,20 +54,20 @@ function App() {
     const image = document.getElementById("inputimage");
     const width = Number(image.width);
     const height = Number(image.height);
-    console.log(width,height,data);
+    console.log(width, height, data);
     console.log(data.bottom_row * height);
 
     const border = {
       leftCol: data.left_col * width,
       topRow: data.top_row * height,
-      rightCol: width - (data.right_col * width),
-      bottomRow: height - (data.bottom_row * height)
-    }
+      rightCol: width - data.right_col * width,
+      bottomRow: height - data.bottom_row * height,
+    };
 
     console.log(border);
 
-    return border
-  }
+    return border;
+  };
 
   const OnInputChange = (event) => {
     setInput(event.target.value);
@@ -71,30 +75,50 @@ function App() {
 
   const displayBox = (box) => {
     setImageBorder(box);
-  }
+  };
+
+  const onRouteChange = (route) => {
+    SetRoute(route);
+    route === 'home' ? SetSignedIn(true) : SetSignedIn(false);
+  };
 
   const onButtonSubmit = () => {
     setImg(input);
     fetch(
-      "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
+      `https://api.clarifai.com/v2/models/face-detection/outputs`,
       getImageReq(input)
     )
       .then((response) => response.json())
-      .then((result) => {console.log(result); return displayBox(calculateFaceLocation(result.outputs[0].data.regions[0].region_info.bounding_box))})
+      .then((result) => {
+        console.log(result);
+        return displayBox(
+          calculateFaceLocation(
+            result.outputs[0].data.regions[0].region_info.bounding_box
+          )
+        );
+      })
       .catch((error) => console.log("error", error));
   };
 
   return (
     <div className="App">
-      <ParticlesBg type="cobweb" bg={true} />
-      <Navigation search />
-      <Logo />
-      <Rank />
-      <ImageLinkFrom
-        inputChange={OnInputChange}
-        buttonSubmit={onButtonSubmit}
-      />
-      <FaceRecognition imageUrl={img} box={imgBorder} />
+      <ParticlesBg color="#FFFFFF" type="cobweb" bg={true} />
+      <Navigation isSignedIn={isSignedIn} onRouteChange={onRouteChange} />
+      {route === "home" ? (
+        <div>
+          <Logo />
+          <Rank />
+          <ImageLinkFrom
+            inputChange={OnInputChange}
+            buttonSubmit={onButtonSubmit}
+          />
+          <FaceRecognition imageUrl={img} box={imgBorder} />
+        </div>
+      ) : route === "signIn" ? (
+        <SignIn onRouteChange={onRouteChange} />
+      ) : (
+        <Register onRouteChange={onRouteChange} />
+      )}
     </div>
   );
 }
