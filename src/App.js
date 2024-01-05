@@ -14,7 +14,9 @@ function App() {
   const [img, setImg] = useState("");
   const [imgBorder, setImageBorder] = useState({});
   const [route, SetRoute] = useState("signIn");
-  const [isSignedIn,SetSignedIn] = useState(false);
+  const [isSignedIn, SetSignedIn] = useState(false);
+  const [user, setUser] = useState({});
+  const [errMsg, setErrMessage] = useState("");
 
   const getImageReq = (img) => {
     const PAT = "57643cc08f004cc1902541cb9266b860";
@@ -54,8 +56,6 @@ function App() {
     const image = document.getElementById("inputimage");
     const width = Number(image.width);
     const height = Number(image.height);
-    console.log(width, height, data);
-    console.log(data.bottom_row * height);
 
     const border = {
       leftCol: data.left_col * width,
@@ -63,8 +63,6 @@ function App() {
       rightCol: width - data.right_col * width,
       bottomRow: height - data.bottom_row * height,
     };
-
-    console.log(border);
 
     return border;
   };
@@ -79,7 +77,31 @@ function App() {
 
   const onRouteChange = (route) => {
     SetRoute(route);
-    route === 'home' ? SetSignedIn(true) : SetSignedIn(false);
+    route === "home" ? SetSignedIn(true) : SetSignedIn(false);
+  };
+
+  const onUserChange = (user) => {
+    setUser(user);
+  };
+
+  const updateUserEntriesCount = async () => {
+    const req = {
+      method: "put",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: user.id,
+      }),
+    };
+
+    try {
+      const response = await fetch("http://localhost:3001/image", req);
+      if (response.ok) {
+        const newEntiries = await response.json();
+        setUser({ ...user, entiries: newEntiries });
+      }
+    } catch (err) {
+      console.log("Falied to update user");
+    }
   };
 
   const onButtonSubmit = () => {
@@ -90,14 +112,19 @@ function App() {
     )
       .then((response) => response.json())
       .then((result) => {
-        console.log(result);
         return displayBox(
           calculateFaceLocation(
             result.outputs[0].data.regions[0].region_info.bounding_box
           )
         );
       })
-      .catch((error) => console.log("error", error));
+      .then(() => {
+        updateUserEntriesCount();
+      })
+      .catch((error) => {
+        console.log(error);
+        setErrMessage("Too long URL, try url that is under 2000 characters");
+      });
   };
 
   return (
@@ -107,17 +134,19 @@ function App() {
       {route === "home" ? (
         <div>
           <Logo />
-          <Rank />
+          <Rank user={user} />
           <ImageLinkFrom
             inputChange={OnInputChange}
             buttonSubmit={onButtonSubmit}
           />
+          <p className="f3 red db">{errMsg}</p>
+
           <FaceRecognition imageUrl={img} box={imgBorder} />
         </div>
       ) : route === "signIn" ? (
-        <SignIn onRouteChange={onRouteChange} />
+        <SignIn getUserData={onUserChange} onRouteChange={onRouteChange} />
       ) : (
-        <Register onRouteChange={onRouteChange} />
+        <Register getUserData={onUserChange} onRouteChange={onRouteChange} />
       )}
     </div>
   );
