@@ -57,12 +57,15 @@ function App() {
     const width = Number(image.width);
     const height = Number(image.height);
 
-    const border = {
-      leftCol: data.left_col * width,
-      topRow: data.top_row * height,
-      rightCol: width - data.right_col * width,
-      bottomRow: height - data.bottom_row * height,
-    };
+    const border = data.map((result, index) => {
+      return {
+        key: index,
+        leftCol: result.region_info.bounding_box.left_col * width,
+        topRow: result.region_info.bounding_box.top_row * height,
+        rightCol: width - result.region_info.bounding_box.right_col * width,
+        bottomRow: height - result.region_info.bounding_box.bottom_row * height,
+      };
+    });
 
     return border;
   };
@@ -76,7 +79,7 @@ function App() {
   };
 
   const onRouteChange = (route) => {
-    setImg('');
+    setImg("");
     setImageBorder({});
     SetRoute(route);
     route === "home" ? SetSignedIn(true) : SetSignedIn(false);
@@ -115,13 +118,11 @@ function App() {
       .then((response) => response.json())
       .then((result) => {
         return displayBox(
-          calculateFaceLocation(
-            result.outputs[0].data.regions[0].region_info.bounding_box
-          )
+          calculateFaceLocation(result.outputs[0].data.regions)
         );
       })
       .then(() => {
-        setErrMessage('');
+        setErrMessage("");
         updateUserEntriesCount();
       })
       .catch((error) => {
