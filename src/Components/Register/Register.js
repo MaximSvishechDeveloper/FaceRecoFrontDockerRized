@@ -20,7 +20,11 @@ const Register = ({ onRouteChange, getUserData }) => {
   };
 
   const onSubmitUser = async () => {
-    if (!validator.isEmail(email) && email.length > 0) {
+    if(email.length === 0 || password.length === 0){
+      setErrMessage("Cant Submit an empty Form")
+      return;
+    } 
+    else if (!validator.isEmail(email) && email.length > 0) {
       setErrMessage("Invalid Email Format");
       setEmail("");
       return;
