@@ -76,6 +76,8 @@ function App() {
   };
 
   const onRouteChange = (route) => {
+    setImg('');
+    setImageBorder({});
     SetRoute(route);
     route === "home" ? SetSignedIn(true) : SetSignedIn(false);
   };
@@ -96,8 +98,8 @@ function App() {
     try {
       const response = await fetch("http://localhost:3001/image", req);
       if (response.ok) {
-        const newEntiries = await response.json();
-        setUser({ ...user, entiries: newEntiries });
+        const newEntries = await response.json();
+        setUser({ ...user, entries: newEntries[0].entries });
       }
     } catch (err) {
       console.log("Falied to update user");
@@ -119,6 +121,7 @@ function App() {
         );
       })
       .then(() => {
+        setErrMessage('');
         updateUserEntriesCount();
       })
       .catch((error) => {
