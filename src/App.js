@@ -47,6 +47,7 @@ function App() {
   };
 
   const onRouteChange = (route) => {
+    setErrMessage("");
     setImg("");
     setImageBorder({});
     SetRoute(route);
