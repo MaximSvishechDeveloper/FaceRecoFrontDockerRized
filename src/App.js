@@ -67,7 +67,7 @@ function App() {
     };
 
     try {
-      const response = await fetch("http://localhost:3001/image", req);
+      const response = await fetch("https://facereco-backend.onrender.com/image", req);
       if (response.ok) {
         const newEntries = await response.json();
         setUser({ ...user, entries: newEntries[0].entries });
@@ -92,7 +92,7 @@ function App() {
       return;
     }
     setImg(input);
-    fetch("http://localhost:3001/imageUrl", req)
+    fetch("https://facereco-backend.onrender.com/imageUrl", req)
       .then((response) => response.json())
       .then((result) => {
         if (Object.keys(result.outputs[0].data).length === 0) {
