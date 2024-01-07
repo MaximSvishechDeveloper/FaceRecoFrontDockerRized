@@ -41,8 +41,10 @@ const SignIn = ({ onRouteChange, getUserData }) => {
         const user = await response.json();
         getUserData(user);
         onRouteChange("home");
-      } else {
-        setErrMessage("User does not exist");
+      } else if(response.status === 400){
+        setErrMessage("wrong password entered");
+      } else if(response.status === 500){
+        setErrMessage("No such User");
       }
     } catch (err) {
       console.error("Fetch error:", err);

@@ -18,39 +18,7 @@ function App() {
   const [user, setUser] = useState({});
   const [errMsg, setErrMessage] = useState("");
 
-  const getImageReq = (img) => {
-    const PAT = "57643cc08f004cc1902541cb9266b860";
-    const USER_ID = "maxim";
-    const APP_ID = "face-reco";
-    const IMAGE_URL = img;
-
-    const raw = JSON.stringify({
-      user_app_id: {
-        user_id: USER_ID,
-        app_id: APP_ID,
-      },
-      inputs: [
-        {
-          data: {
-            image: {
-              url: IMAGE_URL,
-            },
-          },
-        },
-      ],
-    });
-
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        Authorization: "Key " + PAT,
-      },
-      body: raw,
-    };
-
-    return requestOptions;
-  };
+  
 
   const calculateFaceLocation = (data) => {
     const image = document.getElementById("inputimage");
@@ -110,28 +78,31 @@ function App() {
   };
 
   const onButtonSubmit = () => {
-    setImageBorder({})
-    setErrMessage('');
-    if(input.length === 0){
+    const req = {
+      method: "post",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        input: input,
+      }),
+    };
+    setImageBorder({});
+    setErrMessage("");
+    if (input.length === 0) {
       setErrMessage("cant submit an empty input");
       return;
     }
     setImg(input);
-    fetch(
-      `https://api.clarifai.com/v2/models/face-detection/outputs`,
-      getImageReq(input)
-    )
+    fetch("http://localhost:3001/imageUrl", req)
       .then((response) => response.json())
       .then((result) => {
-        if(Object.keys(result.outputs[0].data).length === 0){
-          console.log(result.outputs[0]);
-          if(result.outputs[0].status.code === 30104){
-            setErrMessage('Too Long URL');
-            return Promise.reject('Too Long URL');
-          }else{
-            setErrMessage('Not a face picture');
-            return Promise.reject('Not a face picture');
-          } 
+        if (Object.keys(result.outputs[0].data).length === 0) {
+          if (result.outputs[0].status.code === 30104) {
+            setErrMessage("Too Long URL");
+            return Promise.reject("Too Long URL");
+          } else {
+            setErrMessage("Not a face picture");
+            return Promise.reject("Not a face picture");
+          }
         }
         return displayBox(
           calculateFaceLocation(result.outputs[0].data.regions)
