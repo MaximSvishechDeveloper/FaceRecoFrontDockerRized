@@ -110,6 +110,12 @@ function App() {
   };
 
   const onButtonSubmit = () => {
+    setImageBorder({})
+    setErrMessage('');
+    if(input.length === 0){
+      setErrMessage("cant submit an empty input");
+      return;
+    }
     setImg(input);
     fetch(
       `https://api.clarifai.com/v2/models/face-detection/outputs`,
@@ -117,6 +123,16 @@ function App() {
     )
       .then((response) => response.json())
       .then((result) => {
+        if(Object.keys(result.outputs[0].data).length === 0){
+          console.log(result.outputs[0]);
+          if(result.outputs[0].status.code === 30104){
+            setErrMessage('Too Long URL');
+            return Promise.reject('Too Long URL');
+          }else{
+            setErrMessage('Not a face picture');
+            return Promise.reject('Not a face picture');
+          } 
+        }
         return displayBox(
           calculateFaceLocation(result.outputs[0].data.regions)
         );
@@ -127,7 +143,7 @@ function App() {
       })
       .catch((error) => {
         console.log(error);
-        setErrMessage("Too long URL, try url that is under 2000 characters");
+        setErrMessage(error);
       });
   };
 
