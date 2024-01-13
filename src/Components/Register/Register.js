@@ -6,6 +6,7 @@ const Register = ({ onRouteChange, getUserData }) => {
   const [password, setPassword] = useState("");
   const [errMsg, setErrMessage] = useState("");
   const [name, setName] = useState("");
+  const [disableButton, setDisableButton] = useState(false);
 
   const onEmailChange = (event) => {
     setEmail(event.target.value);
@@ -20,11 +21,10 @@ const Register = ({ onRouteChange, getUserData }) => {
   };
 
   const onSubmitUser = async () => {
-    if(email.length === 0 || password.length === 0){
-      setErrMessage("Cant Submit an empty Form")
+    if (email.length === 0 || password.length === 0) {
+      setErrMessage("Cant Submit an empty Form");
       return;
-    } 
-    else if (!validator.isEmail(email) && email.length > 0) {
+    } else if (!validator.isEmail(email) && email.length > 0) {
       setErrMessage("Invalid Email Format");
       setEmail("");
       return;
@@ -34,15 +34,19 @@ const Register = ({ onRouteChange, getUserData }) => {
       return;
     }
     try {
-      const response = await fetch("https://facereco-backend.onrender.com/register", {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name,
-          email: email,
-          password: password,
-        }),
-      });
+      setDisableButton(true);
+      const response = await fetch(
+        "https://facereco-backend.onrender.com/register",
+        {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            password: password,
+          }),
+        }
+      );
       if (response.ok) {
         const user = await response.json();
         getUserData(user);
@@ -52,6 +56,8 @@ const Register = ({ onRouteChange, getUserData }) => {
       }
     } catch (err) {
       console.error("Fetch error:", err);
+    } finally {
+      setDisableButton(false);
     }
   };
 
@@ -122,7 +128,8 @@ const Register = ({ onRouteChange, getUserData }) => {
               onClick={onSubmitUser}
               className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
               type="submit"
-              value="Register"
+              value={disableButton ? "Loading..." : "Register"}
+              disabled={disableButton}
             />
           </div>
           <p className="f3 red db">{errMsg}</p>

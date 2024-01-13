@@ -5,6 +5,7 @@ const SignIn = ({ onRouteChange, getUserData }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errMsg, setErrMessage] = useState("");
+  const [disableButton, setDisableButton] = useState(false);
 
   const onEmailChange = (event) => {
     setEmail(event.target.value);
@@ -15,11 +16,10 @@ const SignIn = ({ onRouteChange, getUserData }) => {
   };
 
   const onSubmitUser = async () => {
-    if(email.length === 0 || password.length === 0){
-      setErrMessage("Cant Submit an empty Form")
+    if (email.length === 0 || password.length === 0) {
+      setErrMessage("Cant Submit an empty Form");
       return;
-    } 
-    else if (!validator.isEmail(email) && email.length > 0) {
+    } else if (!validator.isEmail(email) && email.length > 0) {
       setErrMessage("Invalid Email Format");
       setEmail("");
       return;
@@ -29,25 +29,31 @@ const SignIn = ({ onRouteChange, getUserData }) => {
       return;
     }
     try {
-      const response = await fetch("https://facereco-backend.onrender.com/signin", {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
+      setDisableButton(true);
+      const response = await fetch(
+        "https://facereco-backend.onrender.com/signin",
+        {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        }
+      );
       if (response.ok) {
         const user = await response.json();
         getUserData(user);
         onRouteChange("home");
-      } else if(response.status === 400){
+      } else if (response.status === 400) {
         setErrMessage("wrong password entered");
-      } else if(response.status === 500){
+      } else if (response.status === 500) {
         setErrMessage("No such User");
       }
     } catch (err) {
       console.error("Fetch error:", err);
+    } finally {
+      setDisableButton(false);
     }
   };
 
@@ -103,9 +109,14 @@ const SignIn = ({ onRouteChange, getUserData }) => {
           <div className="">
             <input
               onClick={onSubmitUser}
-              className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
+              className={
+                !disableButton
+                  ? "b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
+                  : "b ph3 pv2 input-reset ba b--black bg-transparent grow"
+              }
               type="submit"
-              value="Sign in"
+              value={disableButton ? "Loading..." : "Sign in"}
+              disabled={disableButton}
             />
           </div>
           <div className="lh-copy mt3">
