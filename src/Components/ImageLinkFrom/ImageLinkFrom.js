@@ -3,7 +3,7 @@ import './ImageLinkFrom.css'
 
 const ImageLinkFrom = (props) => {
   return (
-    <div>
+    <>
       <p className="f3">
         {"This Magic Brain will detect faces in your pictures.Give it a try"}
       </p>
@@ -13,7 +13,7 @@ const ImageLinkFrom = (props) => {
         <button onClick={props.buttonSubmit} className="w-30 grow f4 link pd3 pv2 dib white bg-light-purple">Detect</button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import validator from "validator";
 
 const SignIn = ({ onRouteChange, getUserData }) => {
@@ -15,16 +15,16 @@ const SignIn = ({ onRouteChange, getUserData }) => {
     setPassword(event.target.value);
   };
 
-  const onSubmitUser = async () => {
+  const onSubmitUser = useCallback(async () => {
     if (email.length === 0 || password.length === 0) {
-      setErrMessage("Cant Submit an empty Form");
+      setErrMessage("Can't submit an empty form");
       return;
     } else if (!validator.isEmail(email) && email.length > 0) {
-      setErrMessage("Invalid Email Format");
+      setErrMessage("Invalid email format");
       setEmail("");
       return;
     } else if (!validator.isLength(password, { min: 5 })) {
-      setErrMessage("Too Short Password");
+      setErrMessage("Too short password");
       setPassword("");
       return;
     }
@@ -46,16 +46,16 @@ const SignIn = ({ onRouteChange, getUserData }) => {
         getUserData(user);
         onRouteChange("home");
       } else if (response.status === 400) {
-        setErrMessage("wrong password entered");
+        setErrMessage("Wrong password entered");
       } else if (response.status === 500) {
-        setErrMessage("No such User");
+        setErrMessage("No such user");
       }
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
       setDisableButton(false);
     }
-  };
+  }, [email, password, onRouteChange, getUserData]); 
 
   useEffect(() => {
     const keyDownHandler = (event) => {
