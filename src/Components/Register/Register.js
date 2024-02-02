@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import validator from "validator";
 
 const Register = ({ onRouteChange, getUserData }) => {
@@ -35,18 +35,15 @@ const Register = ({ onRouteChange, getUserData }) => {
     }
     try {
       setDisableButton(true);
-      const response = await fetch(
-        "https://facereco-backend.onrender.com/register",
-        {
-          method: "post",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: name,
-            email: email,
-            password: password,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:3001/register", {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name,
+          email: email,
+          password: password,
+        }),
+      });
       if (response.ok) {
         const user = await response.json();
         getUserData(user);
@@ -59,7 +56,7 @@ const Register = ({ onRouteChange, getUserData }) => {
     } finally {
       setDisableButton(false);
     }
-  }, [email, password, name, onRouteChange, getUserData]); 
+  }, [email, password, name, onRouteChange, getUserData]);
 
   useEffect(() => {
     const keyDownHandler = (event) => {
