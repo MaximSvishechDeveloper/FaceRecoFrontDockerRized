@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import Navigation from "./Components/Navigation/Navigation";
 import Logo from "./Components/Logo/Logo";
@@ -44,6 +44,22 @@ function App() {
     setImageBorder(box);
   };
 
+  useEffect(() => {
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:3001/signin", {
+        method: "post",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+      })
+        .then((res) => res.json())
+        .then((r) => console.log(r))
+        .catch((error) => console.error("Error during fetch:", error));
+    }
+  }, []);
+
   const onRouteChange = (route) => {
     setErrMessage("");
     setImg("");
@@ -54,6 +70,10 @@ function App() {
 
   const onUserChange = (user) => {
     setUser(user);
+  };
+
+  const updateUser = (name, age, pet) => {
+    setUser({ ...user, name: name });
   };
 
   const updateUserEntriesCount = async () => {
@@ -120,7 +140,12 @@ function App() {
   return (
     <div className="App">
       <ParticlesBg color="#FFFFFF" type="cobweb" bg={true} />
-      <Navigation isSignedIn={isSignedIn} onRouteChange={onRouteChange} />
+      <Navigation
+        user={user}
+        updateUserData={updateUser}
+        isSignedIn={isSignedIn}
+        onRouteChange={onRouteChange}
+      />
       {route === "home" ? (
         <div>
           <Logo />

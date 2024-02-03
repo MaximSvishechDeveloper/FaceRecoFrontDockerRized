@@ -15,6 +15,10 @@ const SignIn = ({ onRouteChange, getUserData }) => {
     setPassword(event.target.value);
   };
 
+  const saveAuthTokenInSession = (token) => {
+    window.localStorage.setItem("token", token);
+  };
+
   const onSubmitUser = useCallback(async () => {
     if (email.length === 0 || password.length === 0) {
       setErrMessage("Can't submit an empty form");
@@ -39,13 +43,17 @@ const SignIn = ({ onRouteChange, getUserData }) => {
         }),
       });
       if (response.ok) {
-        const user = await response.json();
+        const data = await response.json();
+        saveAuthTokenInSession(data.token);
+        const userPromise = await fetch(
+          `http://localhost:3001/profile/${data.userId}`
+        );
+        const user = await userPromise.json();
         getUserData(user);
         onRouteChange("home");
-      } else if (response.status === 400) {
-        setErrMessage("Wrong password entered");
-      } else if (response.status === 500) {
-        setErrMessage("No such user");
+      } else if (!response.ok) {
+        const error = await response.json();
+        setErrMessage(error);
       }
     } catch (err) {
       console.error("Fetch error:", err);
