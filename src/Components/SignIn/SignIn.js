@@ -46,7 +46,14 @@ const SignIn = ({ onRouteChange, getUserData }) => {
         const data = await response.json();
         saveAuthTokenInSession(data.token);
         const userPromise = await fetch(
-          `http://localhost:3001/profile/${data.userId}`
+          `http://localhost:3001/profile/${data.userId}`,
+          {
+            method: "get",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: window.localStorage.getItem("token"),
+            },
+          }
         );
         const user = await userPromise.json();
         getUserData(user);

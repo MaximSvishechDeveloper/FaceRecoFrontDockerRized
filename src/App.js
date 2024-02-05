@@ -19,21 +19,24 @@ function App() {
   const [errMsg, setErrMessage] = useState("");
 
   const calculateFaceLocation = (data) => {
-    const image = document.getElementById("inputimage");
-    const width = Number(image.width);
-    const height = Number(image.height);
+    if (data) {
+      const image = document.getElementById("inputimage");
+      const width = Number(image.width);
+      const height = Number(image.height);
 
-    const border = data.map((result, index) => {
-      return {
-        key: index,
-        leftCol: result.region_info.bounding_box.left_col * width,
-        topRow: result.region_info.bounding_box.top_row * height,
-        rightCol: width - result.region_info.bounding_box.right_col * width,
-        bottomRow: height - result.region_info.bounding_box.bottom_row * height,
-      };
-    });
+      const border = data.map((result, index) => {
+        return {
+          key: index,
+          leftCol: result.region_info.bounding_box.left_col * width,
+          topRow: result.region_info.bounding_box.top_row * height,
+          rightCol: width - result.region_info.bounding_box.right_col * width,
+          bottomRow:
+            height - result.region_info.bounding_box.bottom_row * height,
+        };
+      });
 
-    return border;
+      return border;
+    }
   };
 
   const OnInputChange = (event) => {
@@ -41,7 +44,28 @@ function App() {
   };
 
   const displayBox = (box) => {
-    setImageBorder(box);
+    if (box) {
+      setImageBorder(box);
+    }
+  };
+
+  const getUserProfile = async (user) => {
+    const userPromise = await fetch(
+      `http://localhost:3001/profile/${user.userId}`,
+      {
+        method: "get",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: window.localStorage.getItem("token"),
+        },
+      }
+    );
+
+    const userProfile = await userPromise.json();
+    if (userProfile) {
+      onUserChange(userProfile);
+      onRouteChange("home");
+    }
   };
 
   useEffect(() => {
@@ -55,7 +79,7 @@ function App() {
         },
       })
         .then((res) => res.json())
-        .then((r) => console.log(r))
+        .then((user) => getUserProfile(user))
         .catch((error) => console.error("Error during fetch:", error));
     }
   }, []);
@@ -65,7 +89,12 @@ function App() {
     setImg("");
     setImageBorder({});
     SetRoute(route);
-    route === "home" ? SetSignedIn(true) : SetSignedIn(false);
+    if (route === "home") {
+      SetSignedIn(true);
+    } else {
+      window.localStorage.removeItem("token");
+      SetSignedIn(false);
+    }
   };
 
   const onUserChange = (user) => {
@@ -79,7 +108,10 @@ function App() {
   const updateUserEntriesCount = async () => {
     const req = {
       method: "put",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: window.localStorage.getItem("token"),
+      },
       body: JSON.stringify({
         id: user.id,
       }),
@@ -99,7 +131,10 @@ function App() {
   const onButtonSubmit = () => {
     const req = {
       method: "post",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: window.localStorage.getItem("token"),
+      },
       body: JSON.stringify({
         input: input,
       }),
@@ -114,7 +149,13 @@ function App() {
     fetch("http://localhost:3001/imageUrl", req)
       .then((response) => response.json())
       .then((result) => {
-        if (Object.keys(result.outputs[0].data).length === 0) {
+        if (
+          result === "Unathorized" ||
+          Object.keys(result?.outputs[0]?.data).length === 0
+        ) {
+          if (result === "Unathorized") {
+            return Promise.reject("Unathorized");
+          }
           if (result.outputs[0].status.code === 30104) {
             setErrMessage("Too Long URL");
             return Promise.reject("Too Long URL");
