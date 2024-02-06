@@ -19,7 +19,10 @@ const Profile = ({ user, onClose, updateUserData }) => {
   const onButtonSave = async () => {
     const req = {
       method: "post",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: window.localStorage.getItem("token"),
+      },
       body: JSON.stringify({
         name: name,
         age: age,
