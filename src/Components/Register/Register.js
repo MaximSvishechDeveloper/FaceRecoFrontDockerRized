@@ -20,6 +20,10 @@ const Register = ({ onRouteChange, getUserData }) => {
     setName(event.target.value);
   };
 
+  const saveAuthTokenInSession = (token) => {
+    window.localStorage.setItem("token", token);
+  };
+
   const onSubmitUser = useCallback(async () => {
     if (email.length === 0 || password.length === 0) {
       setErrMessage("Can't submit an empty form");
@@ -45,7 +49,8 @@ const Register = ({ onRouteChange, getUserData }) => {
         }),
       });
       if (response.ok) {
-        const user = await response.json();
+        const { user, token } = await response.json();
+        saveAuthTokenInSession(token);
         getUserData(user);
         onRouteChange("home");
       } else {
