@@ -102,7 +102,13 @@ function App() {
   };
 
   const updateUser = (name, age, pet) => {
-    setUser({ ...user, name: name });
+    setUser((prevUser) => {
+      const updatedUser = { ...prevUser };
+      if (name !== "") updatedUser.name = name;
+      if (age !== "" && age !== 0) updatedUser.age = age;
+      if (pet !== "") updatedUser.pet = pet;
+      return updatedUser;
+    });
   };
 
   const updateUserEntriesCount = async () => {

@@ -3,7 +3,7 @@ import "./Profile.css";
 
 const Profile = ({ user, onClose, updateUserData }) => {
   const [name, setName] = useState("");
-  const [age, setAge] = useState("");
+  const [age, setAge] = useState(0);
   const [pet, setPet] = useState("");
 
   const onNameChange = (event) => {
@@ -46,7 +46,9 @@ const Profile = ({ user, onClose, updateUserData }) => {
     <div className="profile-modal">
       <article className="br3 ba dark-gray b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center bg-white">
         <main className="pa4 black-80 w-80">
-          <h1>{user.name}</h1>
+          <h1>Hello {user.name}</h1>
+          <h2>Age: {user.age}</h2>
+          <h2>Pet Name: {user.pet}</h2>
           <h4>Image Submitted: {Number(user.entries)}</h4>
           <p>Member Since: {new Date(user.joined).toLocaleDateString()}</p>
           <hr />
